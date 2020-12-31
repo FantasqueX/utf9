@@ -23,26 +23,28 @@ Example:
 
 from bitarray import bitarray as _bitarray
 
-def utf9encode(string):
+
+def utf9encode(string: str):
     """Takes a string and returns a utf9-encoded version."""
     bits = _bitarray()
     for char in string:
         for idx, byte in enumerate(char.encode('utf-8')):
             bits.append(idx)
-            bits.extend('{0:b}'.format(ord(byte)).zfill(8))
+            bits.extend('{0:b}'.format(byte).zfill(8))
     return bits.tobytes()
 
-def utf9decode(data):
+
+def utf9decode(data: bytes):
     """Takes utf9-encoded data and returns the corresponding string."""
     bits = _bitarray()
     bits.frombytes(data)
-    chunks = (bits[x:x+9] for x in xrange(0, len(bits), 9))
-    string = u''
-    codepoint = ''
+    chunks = (bits[x:x+9] for x in range(0, len(bits), 9))
+    string = ''
+    codepoint = b''
     for chunk in chunks:
         if len(chunk) < 9:
             break
         if chunk[0] == 0:
-            codepoint, string = '', string + codepoint.decode('utf-8')
-        codepoint += chr(int(chunk[1:].to01(), 2))
+            codepoint, string = b'', string + codepoint.decode('utf-8')
+        codepoint += chunk[1:].tobytes()
     return string + codepoint.decode('utf-8')
